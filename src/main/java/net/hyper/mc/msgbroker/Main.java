@@ -1,11 +1,12 @@
 package net.hyper.mc.msgbroker;
 
+import balbucio.responsivescheduler.RSTask;
+import balbucio.responsivescheduler.ResponsiveScheduler;
 import co.gongzh.procbridge.Server;
 import net.hyper.mc.msgbroker.delegate.MessageChannel;
 import net.hyper.mc.msgbroker.logger.LoggerFormat;
 import net.hyper.mc.msgbroker.manager.QueueManager;
 import net.hyper.mc.msgbroker.manager.UserManager;
-import org.apache.logging.log4j.LogManager;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -37,6 +38,7 @@ public class Main {
     private File cnf = new File("config.yml");
     private HMBConfig config;
     private Server server;
+    private ResponsiveScheduler scheduler;
     public Main(){
         try {
             LOGGER.setUseParentHandlers(false);
@@ -57,6 +59,24 @@ public class Main {
             this.server = new Server(config.getPort(), new MessageChannel());
             server.start();
             LOGGER.info("Done! You can now connect your servers in the message broker.");
+            scheduler = new ResponsiveScheduler();
+            scheduler.repeatTask(new RSTask(){
+                @Override
+                public void run(){
+                    try {
+                        QueueManager.getInstance().getMessages().forEach((q, l) -> {
+                            l.forEach(m -> {
+                                if (m.getRead().size() >= (UserManager.getInstance().getConnected().size() - 1)) {
+                                    QueueManager.getInstance().getMessages().get(q).remove(m);
+                                    Main.LOGGER.info("Everyone marked the message ID " + m.getId() + " as read, so it was deleted. (" + QueueManager.getInstance().getMessages().get(q).size() + ")");
+                                }
+                            });
+                        });
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }, 0, 10000);
         } catch (Exception e){
             e.printStackTrace();
         }

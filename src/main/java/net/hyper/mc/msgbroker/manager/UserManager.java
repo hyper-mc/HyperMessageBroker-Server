@@ -24,10 +24,12 @@ public class UserManager {
     public String connect(){
         String token = Main.createToken(32);
         connected.add(token);
+        Main.LOGGER.info("New consumer and producer has connected, your token is "+token+".");
         return token;
     }
 
     public void disconnect(String token){
         connected.remove(token);
+        Main.LOGGER.info("The consumer and producer of Token "+token+" has disconnected.");
     }
 }

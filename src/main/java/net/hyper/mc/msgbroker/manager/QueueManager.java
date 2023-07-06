@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 @Data
@@ -28,10 +29,11 @@ public class QueueManager {
 
     public JSONObject createMessage(String queue, String creator, Object value){
         if (!messages.containsKey(queue)) {
-            messages.put(queue, new ArrayList<>());
+            messages.put(queue, new CopyOnWriteArrayList<>());
         }
         Message msg = new Message(Main.createToken(24), creator, value, new ArrayList<>());
         messages.get(queue).add(msg);
+        Main.LOGGER.info("Message of ID "+msg.getId()+" was created by sender of ID "+msg.getSender()+".");
         return new JSONObject().put("id", msg.getId());
     }
 
@@ -47,16 +49,13 @@ public class QueueManager {
                 .put("creator", m.getSender())
                 .put("value", m.getValue())));
         packet.put("msgs", array);
+        Main.LOGGER.info("The consumer of Token "+consumer+" has "+nonRead.size()+" messages non readed.");
         return packet;
     }
 
     public void confirmRead(String queue, String consumer, String id){
         messages.get(queue).stream().filter(m -> m.getId().equalsIgnoreCase(id)).forEach(m -> {
             m.getRead().add(consumer);
-            if(m.getRead().size() == UserManager.getInstance().getConnected().size()){
-                messages.get(queue).remove(m);
-                Main.LOGGER.info("Everyone marked the message ID "+id+" as read, so it was deleted.");
-            }
         });
     }
 }
