@@ -2,10 +2,10 @@ package net.hyper.mc.msgbroker;
 
 import co.gongzh.procbridge.Server;
 import net.hyper.mc.msgbroker.delegate.MessageChannel;
+import net.hyper.mc.msgbroker.logger.LoggerFormat;
 import net.hyper.mc.msgbroker.manager.QueueManager;
 import net.hyper.mc.msgbroker.manager.UserManager;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -13,17 +13,23 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Random;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Logger;
 
 public class Main {
 
-    public static Logger LOGGER = LogManager.getLogger();
+    public static Logger LOGGER = Logger.getGlobal();
 
     public static void main(String[] args) {
         System.out.println("\n" +
-                "█████████████████████████████████████████████████████████████████▀██████████████████████████████████████████\n" +
-                "█─█─█▄─█─▄█▄─▄▄─█▄─▄▄─█▄─▄▄▀█▄─▀█▀─▄█▄─▄▄─█─▄▄▄▄█─▄▄▄▄██▀▄─██─▄▄▄▄█▄─▄▄─█▄─▄─▀█▄─▄▄▀█─▄▄─█▄─█─▄█▄─▄▄─█▄─▄▄▀█\n" +
-                "█─▄─██▄─▄███─▄▄▄██─▄█▀██─▄─▄██─█▄█─███─▄█▀█▄▄▄▄─█▄▄▄▄─██─▀─██─██▄─██─▄█▀██─▄─▀██─▄─▄█─██─██─▄▀███─▄█▀██─▄─▄█\n" +
-                "▀▄▀▄▀▀▄▄▄▀▀▄▄▄▀▀▀▄▄▄▄▄▀▄▄▀▄▄▀▄▄▄▀▄▄▄▀▄▄▄▄▄▀▄▄▄▄▄▀▄▄▄▄▄▀▄▄▀▄▄▀▄▄▄▄▄▀▄▄▄▄▄▀▄▄▄▄▀▀▄▄▀▄▄▀▄▄▄▄▀▄▄▀▄▄▀▄▄▄▄▄▀▄▄▀▄▄▀");
+                "  _    _                       __  __                                ____            _             \n" +
+                " | |  | |                     |  \\/  |                              |  _ \\          | |            \n" +
+                " | |__| |_   _ _ __   ___ _ __| \\  / | ___  ___ ___  __ _  __ _  ___| |_) |_ __ ___ | | _____ _ __ \n" +
+                " |  __  | | | | '_ \\ / _ \\ '__| |\\/| |/ _ \\/ __/ __|/ _` |/ _` |/ _ \\  _ <| '__/ _ \\| |/ / _ \\ '__|\n" +
+                " | |  | | |_| | |_) |  __/ |  | |  | |  __/\\__ \\__ \\ (_| | (_| |  __/ |_) | | | (_) |   <  __/ |   \n" +
+                " |_|  |_|\\__, | .__/ \\___|_|  |_|  |_|\\___||___/___/\\__,_|\\__, |\\___|____/|_|  \\___/|_|\\_\\___|_|   \n" +
+                "          __/ | |                                          __/ |                                   \n" +
+                "         |___/|_|                                         |___/                                    \n");
         System.out.println("HyperMessageBroker is developed and maintained by the HyperNetwork team.");
         new Main();
     }
@@ -33,14 +39,21 @@ public class Main {
     private Server server;
     public Main(){
         try {
+            LOGGER.setUseParentHandlers(false);
+            ConsoleHandler handler = new ConsoleHandler();
+            handler.setFormatter(new LoggerFormat());
+            LOGGER.addHandler(handler);
             LOGGER.info("Loading configuration...");
             if (!cnf.exists()) {
                 Files.copy(this.getClass().getResourceAsStream("/config.yml"), cnf.toPath());
             }
             Yaml yaml = new Yaml(new Constructor(HMBConfig.class, new LoaderOptions()));
             config = yaml.load(Files.newInputStream(cnf.toPath()));
+            LOGGER.info("Loading user manager...");
             new UserManager();
+            LOGGER.info("Loading queue manager...");
             new QueueManager();
+            LOGGER.info("Starting server in port "+config.getPort());
             this.server = new Server(config.getPort(), new MessageChannel());
             server.start();
             LOGGER.info("Done! You can now connect your servers in the message broker.");

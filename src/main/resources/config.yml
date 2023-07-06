@@ -1,0 +1,2 @@
+# Defina a porta na qual o servidor deve ser iniciado
+port: 25365
