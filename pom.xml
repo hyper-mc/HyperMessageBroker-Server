@@ -22,11 +22,10 @@
     </repositories>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/co.gongzh.procbridge/procbridge -->
         <dependency>
-            <groupId>co.gongzh.procbridge</groupId>
-            <artifactId>procbridge</artifactId>
-            <version>1.1</version>
+            <groupId>com.github.SrBalbucio</groupId>
+            <artifactId>procbridge-java</artifactId>
+            <version>f4c8389016</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
         <dependency>
