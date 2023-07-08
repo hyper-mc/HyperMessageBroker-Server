@@ -49,7 +49,7 @@ public class QueueManager {
                 .put("creator", m.getSender())
                 .put("value", m.getValue())));
         packet.put("msgs", array);
-        Main.LOGGER.info("The consumer of Token "+consumer+" has "+nonRead.size()+" messages non readed.");
+        //Main.LOGGER.info("The consumer of Token "+consumer+" has "+nonRead.size()+" messages non readed.");
         return packet;
     }
 
