@@ -38,7 +38,7 @@ public class QueueManager {
     }
 
     public JSONObject getUpdates(String queue, String consumer){
-        List<Message> nonRead = messages.get(queue).stream()
+        List<Message> nonRead = messages.getOrDefault(queue, new ArrayList<>()).stream()
                 .filter(m -> !m.getRead().stream().anyMatch(c -> c.equalsIgnoreCase(consumer)) && !m.getSender().equalsIgnoreCase(consumer))
                 .collect(Collectors.toList());
         JSONObject packet = new JSONObject();
