@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.github.SrBalbucio</groupId>
             <artifactId>procbridge-java</artifactId>
-            <version>f4c8389016</version>
+            <version>46465ef68c</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
         <dependency>

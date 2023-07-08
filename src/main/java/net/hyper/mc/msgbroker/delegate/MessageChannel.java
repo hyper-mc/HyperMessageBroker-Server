@@ -21,6 +21,6 @@ public class MessageChannel implements IDelegate {
         } else if(s.equalsIgnoreCase("READ")){
             QueueManager.getInstance().confirmRead(payload.getString("queue"), payload.getString("token"), payload.getString("id"));
         }
-        return null;
+        return new JSONObject().toString();
     }
 }
