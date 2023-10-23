@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 public class Main {
 
-    public static Logger LOGGER = Logger.getGlobal();
+    public static Logger LOGGER = Logger.getLogger("HyperMessageBroker");
 
     public static void main(String[] args) {
         System.out.println("\n" +
