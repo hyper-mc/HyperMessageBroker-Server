@@ -1,6 +1,7 @@
 package net.hyper.mc.msgbroker.manager;
 
 import lombok.Data;
+import lombok.Getter;
 import net.hyper.mc.msgbroker.Main;
 import net.hyper.mc.msgbroker.model.Message;
 import org.json.JSONArray;
@@ -15,11 +16,8 @@ import java.util.stream.Collectors;
 @Data
 public class QueueManager {
 
+    @Getter
     private static QueueManager instance;
-
-    public static QueueManager getInstance() {
-        return instance;
-    }
 
     private ConcurrentHashMap<String, List<Message>> messages = new ConcurrentHashMap<>();
 
@@ -39,7 +37,7 @@ public class QueueManager {
 
     public JSONObject getUpdates(String queue, String consumer){
         List<Message> nonRead = messages.getOrDefault(queue, new ArrayList<>()).stream()
-                .filter(m -> !m.getRead().stream().anyMatch(c -> c.equalsIgnoreCase(consumer)) && !m.getSender().equalsIgnoreCase(consumer))
+                .filter(m -> m.getRead().stream().noneMatch(c -> c.equalsIgnoreCase(consumer)) && !m.getSender().equalsIgnoreCase(consumer))
                 .collect(Collectors.toList());
         JSONObject packet = new JSONObject();
         packet.put("token", consumer);

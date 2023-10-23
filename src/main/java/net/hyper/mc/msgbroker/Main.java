@@ -3,6 +3,7 @@ package net.hyper.mc.msgbroker;
 import balbucio.responsivescheduler.RSTask;
 import balbucio.responsivescheduler.ResponsiveScheduler;
 import co.gongzh.procbridge.Server;
+import lombok.SneakyThrows;
 import net.hyper.mc.msgbroker.delegate.MessageChannel;
 import net.hyper.mc.msgbroker.logger.LoggerFormat;
 import net.hyper.mc.msgbroker.manager.QueueManager;
@@ -31,7 +32,8 @@ public class Main {
                 " |_|  |_|\\__, | .__/ \\___|_|  |_|  |_|\\___||___/___/\\__,_|\\__, |\\___|____/|_|  \\___/|_|\\_\\___|_|   \n" +
                 "          __/ | |                                          __/ |                                   \n" +
                 "         |___/|_|                                         |___/                                    \n");
-        System.out.println("HyperMessageBroker is developed and maintained by the HyperNetwork team.");
+        System.out.println("HyperMessageBroker is developed and maintained by the HyperPowered team.");
+        System.out.println("Find out about our services at https://hyperpowered.net");
         new Main();
     }
 
@@ -39,50 +41,54 @@ public class Main {
     private HMBConfig config;
     private Server server;
     private ResponsiveScheduler scheduler;
-    public Main(){
-        try {
-            LOGGER.setUseParentHandlers(false);
-            ConsoleHandler handler = new ConsoleHandler();
-            handler.setFormatter(new LoggerFormat());
-            LOGGER.addHandler(handler);
-            LOGGER.info("Loading configuration...");
-            if (!cnf.exists()) {
-                Files.copy(this.getClass().getResourceAsStream("/config.yml"), cnf.toPath());
-            }
-            Yaml yaml = new Yaml(new Constructor(HMBConfig.class, new LoaderOptions()));
-            config = yaml.load(Files.newInputStream(cnf.toPath()));
-            LOGGER.info("Loading user manager...");
-            new UserManager();
-            LOGGER.info("Loading queue manager...");
-            new QueueManager();
-            LOGGER.info("Starting server in port "+config.getPort());
-            this.server = new Server(config.getPort(), new MessageChannel());
-            server.start();
-            LOGGER.info("Done! You can now connect your servers in the message broker.");
-            scheduler = new ResponsiveScheduler();
-            scheduler.repeatTask(new RSTask(){
-                @Override
-                public void run(){
-                    try {
-                        QueueManager.getInstance().getMessages().forEach((q, l) -> {
-                            l.forEach(m -> {
-                                if (m.getRead().size() >= (UserManager.getInstance().getConnected().size() - 1)) {
-                                    QueueManager.getInstance().getMessages().get(q).remove(m);
-                                    Main.LOGGER.info("Everyone marked the message ID " + m.getId() + " as read, so it was deleted. (" + QueueManager.getInstance().getMessages().get(q).size() + ")");
-                                }
-                            });
-                        });
-                    } catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            }, 0, 10000);
-        } catch (Exception e){
-            e.printStackTrace();
+
+    @SneakyThrows
+    public Main() {
+        LOGGER.setUseParentHandlers(false);
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LoggerFormat());
+        LOGGER.addHandler(handler);
+        LOGGER.info("Loading configuration...");
+        if (!cnf.exists()) {
+            Files.copy(this.getClass().getResourceAsStream("/config.yml"), cnf.toPath());
         }
+        Yaml yaml = new Yaml(new Constructor(HMBConfig.class, new LoaderOptions()));
+        config = yaml.load(Files.newInputStream(cnf.toPath()));
+        LOGGER.info("Loading user manager...");
+        new UserManager();
+        LOGGER.info("Loading queue manager...");
+        new QueueManager();
+        LOGGER.info("Starting server in port " + config.getPort());
+        this.server = new Server(config.getPort(), new MessageChannel());
+        server.start();
+        LOGGER.info("Done! You can now connect your servers in the message broker.");
+        scheduler = new ResponsiveScheduler();
+        scheduler.repeatTask(new RSTask() {
+            @Override
+            public void run() {
+                try {
+                    UserManager.getInstance().getConnected().forEach((t, l) -> {
+                        long limit = l + 10000;
+                        if(System.currentTimeMillis() > limit){
+                            UserManager.getInstance().remove(t);
+                        }
+                    });
+                    QueueManager.getInstance().getMessages().forEach((q, l) -> {
+                        l.forEach(m -> {
+                            if (m.getRead().size() >= (UserManager.getInstance().getConnected().size() - 1)) {
+                                QueueManager.getInstance().getMessages().get(q).remove(m);
+                                Main.LOGGER.info("Everyone marked the message ID " + m.getId() + " as read, so it was deleted. (" + QueueManager.getInstance().getMessages().get(q).size() + ")");
+                            }
+                        });
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0, 10000);
     }
 
-    public static String createToken(int size){
+    public static String createToken(int size) {
         Random random = new Random();
         int leftLimit = 48;
         int rightLimit = 122;

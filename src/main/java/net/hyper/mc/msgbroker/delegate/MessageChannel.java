@@ -20,6 +20,8 @@ public class MessageChannel implements IDelegate {
             UserManager.getInstance().disconnect(payload.getString("token"));
         } else if(s.equalsIgnoreCase("READ")){
             QueueManager.getInstance().confirmRead(payload.getString("queue"), payload.getString("token"), payload.getString("id"));
+        } else if(s.equalsIgnoreCase("ONLINE")){
+            UserManager.getInstance().update(payload.getString("token"));
         }
         return new JSONObject().toString();
     }
