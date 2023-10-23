@@ -43,19 +43,13 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.28</version>
+            <version>1.18.30</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.SrBalbucio</groupId>
             <artifactId>ResponsiveScheduler</artifactId>
-            <version>v1.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.SrBalbucio</groupId>
-            <artifactId>ResponsiveScheduler</artifactId>
-            <version>v1.0.2</version>
-            <scope>compile</scope>
+            <version>v1.0.5</version>
         </dependency>
     </dependencies>
 
