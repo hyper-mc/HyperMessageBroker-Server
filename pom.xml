@@ -19,13 +19,18 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>hyperpowered-maven-releases</id>
+            <name>HyperPowered Maven Repository</name>
+            <url>https://maven.hyperpowered.net/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>com.github.SrBalbucio</groupId>
-            <artifactId>procbridge-java</artifactId>
-            <version>f35beb479f</version>
+            <groupId>co.gongzh.procbridge</groupId>
+            <artifactId>procbridge</artifactId>
+            <version>1.2</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
         <dependency>
