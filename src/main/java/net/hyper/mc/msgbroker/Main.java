@@ -2,7 +2,7 @@ package net.hyper.mc.msgbroker;
 
 import balbucio.responsivescheduler.RSTask;
 import balbucio.responsivescheduler.ResponsiveScheduler;
-import co.gongzh.procbridge.Server;
+import co.gongzh.procbridge.server.Server;
 import lombok.SneakyThrows;
 import net.hyper.mc.msgbroker.delegate.MessageChannel;
 import net.hyper.mc.msgbroker.logger.LoggerFormat;

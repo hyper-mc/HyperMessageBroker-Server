@@ -1,6 +1,6 @@
 package net.hyper.mc.msgbroker.delegate;
 
-import co.gongzh.procbridge.IDelegate;
+import co.gongzh.procbridge.server.IDelegate;
 import net.hyper.mc.msgbroker.manager.QueueManager;
 import net.hyper.mc.msgbroker.manager.UserManager;
 import org.jetbrains.annotations.Nullable;
