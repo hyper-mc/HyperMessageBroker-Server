@@ -6,7 +6,7 @@
 
     <groupId>net.hyper.mc.msgbroker</groupId>
     <artifactId>HyperMessageBroker</artifactId>
-    <version>1.2.1-SNAPSHOT</version>
+    <version>1.2.2-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -16,8 +16,9 @@
 
     <repositories>
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
+            <id>hyperpowered-maven-releases</id>
+            <name>HyperPowered Maven Repository</name>
+            <url>https://maven.hyperpowered.net/releases</url>
         </repository>
         <repository>
             <id>hyperpowered-maven-releases</id>
@@ -52,9 +53,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.SrBalbucio</groupId>
-            <artifactId>ResponsiveScheduler</artifactId>
-            <version>v1.0.5</version>
+            <groupId>balbucio.throwable</groupId>
+            <artifactId>throwable</artifactId>
+            <version>1.2.1</version>
         </dependency>
     </dependencies>
 

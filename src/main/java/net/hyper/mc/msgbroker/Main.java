@@ -1,7 +1,6 @@
 package net.hyper.mc.msgbroker;
 
-import balbucio.responsivescheduler.RSTask;
-import balbucio.responsivescheduler.ResponsiveScheduler;
+import balbucio.throwable.Throwable;
 import co.gongzh.procbridge.server.Server;
 import lombok.SneakyThrows;
 import net.hyper.mc.msgbroker.delegate.MessageChannel;
@@ -15,6 +14,9 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 
@@ -40,7 +42,7 @@ public class Main {
     private File cnf = new File("config.yml");
     private HMBConfig config;
     private Server server;
-    private ResponsiveScheduler scheduler;
+    private ScheduledExecutorService scheduler;
 
     @SneakyThrows
     public Main() {
@@ -62,30 +64,23 @@ public class Main {
         this.server = new Server(config.getPort(), new MessageChannel());
         server.start();
         LOGGER.info("Done! You can now connect your servers in the message broker.");
-        scheduler = new ResponsiveScheduler();
-        scheduler.repeatTask(new RSTask() {
-            @Override
-            public void run() {
-                try {
-                    UserManager.getInstance().getConnected().forEach((t, l) -> {
-                        long limit = l + 10000;
-                        if(System.currentTimeMillis() > limit){
-                            UserManager.getInstance().remove(t);
-                        }
-                    });
-                    QueueManager.getInstance().getMessages().forEach((q, l) -> {
-                        l.forEach(m -> {
-                            if (m.getRead().size() >= (UserManager.getInstance().getConnected().size() - 1)) {
-                                QueueManager.getInstance().getMessages().get(q).remove(m);
-                                Main.LOGGER.info("Everyone marked the message ID " + m.getId() + " as read, so it was deleted. (" + QueueManager.getInstance().getMessages().get(q).size() + ")");
-                            }
-                        });
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
+        scheduler = Executors.newScheduledThreadPool(config.getPoolSize());
+        scheduler.scheduleWithFixedDelay(Throwable.throwRunnable(() -> {
+            UserManager.getInstance().getConnected().forEach((t, l) -> {
+                long limit = l + 10000;
+                if (System.currentTimeMillis() > limit) {
+                    UserManager.getInstance().remove(t);
                 }
-            }
-        }, 0, 10000);
+            });
+            QueueManager.getInstance().getMessages().forEach((q, l) -> {
+                l.forEach(m -> {
+                    if (m.getRead().size() >= (UserManager.getInstance().getConnected().size() - 1)) {
+                        QueueManager.getInstance().getMessages().get(q).remove(m);
+                        Main.LOGGER.info("Everyone marked the message ID " + m.getId() + " as read, so it was deleted. (" + QueueManager.getInstance().getMessages().get(q).size() + ")");
+                    }
+                });
+            });
+        }), 0, 1000, TimeUnit.MILLISECONDS);
     }
 
     public static String createToken(int size) {

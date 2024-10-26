@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class HMBConfig {
 
-    private int port;
-
+    private int port = 25365;
+    private int poolSize = 4;
 }
