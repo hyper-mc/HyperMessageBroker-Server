@@ -1,0 +1,6 @@
+# Defina a porta na qual o servidor deve ser iniciado
+port: 25365
+# Defina a quantidade de threads do pool
+poolSize: 4
+# Defina o delay para limpeza de mensagens já vistas ou antigas demais
+cleanDelay: 5 # em segundos

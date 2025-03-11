@@ -6,7 +6,7 @@
 
     <groupId>net.hyper.mc.msgbroker</groupId>
     <artifactId>HyperMessageBroker</artifactId>
-    <version>1.2.2-SNAPSHOT</version>
+    <version>1.2.3</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

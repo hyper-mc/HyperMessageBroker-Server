@@ -65,7 +65,7 @@ public class Main implements Runnable {
         server.start();
         LOGGER.info("Done! You can now connect your servers in the message broker.");
         scheduler = Executors.newScheduledThreadPool(config.getPoolSize());
-        scheduler.scheduleWithFixedDelay(this, 0, 5, TimeUnit.SECONDS);
+        scheduler.scheduleWithFixedDelay(this, 0, config.getCleanDelay(), TimeUnit.SECONDS);
     }
 
     public static String createToken(int size) {
