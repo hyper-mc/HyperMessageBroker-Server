@@ -21,21 +21,21 @@ public class QueueManager {
 
     private ConcurrentHashMap<String, List<Message>> messages = new ConcurrentHashMap<>();
 
-    public QueueManager(){
+    public QueueManager() {
         instance = this;
     }
 
-    public JSONObject createMessage(String queue, String creator, Object value){
+    public JSONObject createMessage(String queue, String creator, Object value) {
         if (!messages.containsKey(queue)) {
             messages.put(queue, new CopyOnWriteArrayList<>());
         }
         Message msg = new Message(Main.createToken(24), creator, value, new ArrayList<>());
         messages.get(queue).add(msg);
-        Main.LOGGER.info("Message of ID "+msg.getId()+" was created by sender of ID "+msg.getSender()+".");
+        Main.LOGGER.info("Message of ID " + msg.getId() + " was created by sender of ID " + msg.getSender() + ".");
         return new JSONObject().put("id", msg.getId());
     }
 
-    public JSONObject getUpdates(String queue, String consumer){
+    public JSONObject getUpdates(String queue, String consumer) {
         List<Message> nonRead = messages.getOrDefault(queue, new ArrayList<>()).stream()
                 .filter(m -> m.getRead().stream().noneMatch(c -> c.equalsIgnoreCase(consumer)) && !m.getSender().equalsIgnoreCase(consumer))
                 .collect(Collectors.toList());
@@ -51,9 +51,20 @@ public class QueueManager {
         return packet;
     }
 
-    public void confirmRead(String queue, String consumer, String id){
+    public void confirmRead(String queue, String consumer, String id) {
         messages.get(queue).stream().filter(m -> m.getId().equalsIgnoreCase(id)).forEach(m -> {
             m.getRead().add(consumer);
+        });
+    }
+
+    public void removeOldMessages() {
+        messages.forEach((q, msgs) -> {
+            msgs.forEach((message -> {
+                if (message.getRead().size() >= (UserManager.getInstance().getConnected().size() - 1)) {
+                    msgs.remove(message);
+                    Main.LOGGER.info("Everyone marked the message ID " + message.getId() + " as read, so it was deleted. (" + msgs.size() + ")");
+                }
+            }));
         });
     }
 }

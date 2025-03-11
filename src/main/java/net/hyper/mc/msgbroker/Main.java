@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 
-public class Main {
+public class Main implements Runnable {
 
     public static Logger LOGGER = Logger.getLogger("HyperMessageBroker");
 
@@ -65,22 +65,7 @@ public class Main {
         server.start();
         LOGGER.info("Done! You can now connect your servers in the message broker.");
         scheduler = Executors.newScheduledThreadPool(config.getPoolSize());
-        scheduler.scheduleWithFixedDelay(Throwable.throwRunnable(() -> {
-            UserManager.getInstance().getConnected().forEach((t, l) -> {
-                long limit = l + 10000;
-                if (System.currentTimeMillis() > limit) {
-                    UserManager.getInstance().remove(t);
-                }
-            });
-            QueueManager.getInstance().getMessages().forEach((q, l) -> {
-                l.forEach(m -> {
-                    if (m.getRead().size() >= (UserManager.getInstance().getConnected().size() - 1)) {
-                        QueueManager.getInstance().getMessages().get(q).remove(m);
-                        Main.LOGGER.info("Everyone marked the message ID " + m.getId() + " as read, so it was deleted. (" + QueueManager.getInstance().getMessages().get(q).size() + ")");
-                    }
-                });
-            });
-        }), 0, 1000, TimeUnit.MILLISECONDS);
+        scheduler.scheduleWithFixedDelay(this, 0, 5, TimeUnit.SECONDS);
     }
 
     public static String createToken(int size) {
@@ -95,5 +80,11 @@ public class Main {
                 .toString();
 
         return generatedString;
+    }
+
+    @Override
+    public void run() {
+        UserManager.getInstance().removeAfk();
+        QueueManager.getInstance().removeOldMessages();
     }
 }

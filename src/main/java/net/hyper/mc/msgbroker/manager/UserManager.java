@@ -15,28 +15,37 @@ public class UserManager {
 
     private Map<String, Long> connected = new ConcurrentHashMap<>();
 
-    public UserManager(){
+    public UserManager() {
         instance = this;
     }
 
-    public String connect(){
+    public String connect() {
         String token = Main.createToken(32);
         connected.put(token, System.currentTimeMillis());
-        Main.LOGGER.info("New consumer and producer has connected, your token is "+token+".");
+        Main.LOGGER.info("New consumer and producer has connected, your token is " + token + ".");
         return token;
     }
 
-    public void disconnect(String token){
+    public void disconnect(String token) {
         connected.remove(token);
-        Main.LOGGER.info("The consumer and producer of Token "+token+" has disconnected.");
+        Main.LOGGER.info("The consumer and producer of Token " + token + " has disconnected.");
     }
 
-    public void remove(String token){
+    public void remove(String token) {
         connected.remove(token);
-        Main.LOGGER.info("The consumer and producer of the "+token+" token has been removed for not sending updates for a long time.");
+        Main.LOGGER.info("The consumer and producer of the " + token + " token has been removed for not sending updates for a long time.");
     }
 
-    public void update(String token){
+    public void update(String token) {
         connected.replace(token, System.currentTimeMillis());
+    }
+
+    public void removeAfk() {
+        connected.forEach((token, time) -> {
+            long limit = time + 10000;
+            if (System.currentTimeMillis() > limit) {
+                remove(token);
+            }
+        });
     }
 }
