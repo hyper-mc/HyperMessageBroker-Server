@@ -3,6 +3,7 @@ package net.hyper.mc.msgbroker.manager;
 import lombok.Data;
 import lombok.Getter;
 import net.hyper.mc.msgbroker.Main;
+import net.hyper.mc.msgbroker.HMBConfig;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,10 +14,12 @@ public class UserManager {
     @Getter
     private static UserManager instance;
 
-    private Map<String, Long> connected = new ConcurrentHashMap<>();
+    private final Map<String, Long> connected = new ConcurrentHashMap<>();
+    private final long tokenTimeoutMs;
 
-    public UserManager() {
+    public UserManager(HMBConfig config) {
         instance = this;
+        this.tokenTimeoutMs = config.getTokenTimeoutSeconds() * 1000L;
     }
 
     public String connect() {
@@ -37,15 +40,28 @@ public class UserManager {
     }
 
     public void update(String token) {
-        connected.replace(token, System.currentTimeMillis());
+        if (connected.replace(token, System.currentTimeMillis()) == null) {
+            Main.LOGGER.warning("Attempt to update unknown token " + token + ". Ignoring.");
+        }
+    }
+
+    public boolean isValid(String token) {
+        return connected.containsKey(token);
     }
 
     public void removeAfk() {
+        if (connected.isEmpty()) {
+            return;
+        }
         connected.forEach((token, time) -> {
-            long limit = time + 10000;
+            long limit = time + tokenTimeoutMs;
             if (System.currentTimeMillis() > limit) {
                 remove(token);
             }
         });
+    }
+
+    public int connectedCount() {
+        return connected.size();
     }
 }

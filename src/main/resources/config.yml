@@ -4,3 +4,9 @@ port: 25365
 poolSize: 4
 # Defina o delay para limpeza de mensagens já vistas ou antigas demais
 cleanDelay: 5 # em segundos
+# Tempo máximo que um cliente pode ficar sem enviar ONLINE antes de ser desconectado.
+tokenTimeoutSeconds: 10
+# Tempo máximo que uma mensagem permanece guardada antes de ser descartada.
+messageTtlSeconds: 120
+# Limite de mensagens em memória por fila (para evitar vazamentos).
+maxMessagesPerQueue: 1000

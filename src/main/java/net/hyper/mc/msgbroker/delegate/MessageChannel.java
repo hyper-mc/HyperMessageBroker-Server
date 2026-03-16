@@ -9,20 +9,29 @@ import org.json.JSONObject;
 public class MessageChannel implements IDelegate {
     @Override
     public @Nullable Object handleRequest(@Nullable String s, @Nullable Object o) {
-        JSONObject payload = new JSONObject((String) o);
-        if(s.equalsIgnoreCase("UPDATE")){
-            return QueueManager.getInstance().getUpdates(payload.getString("queue"), payload.getString("token"));
-        } else if(s.equalsIgnoreCase("CREATE")){
-            return QueueManager.getInstance().createMessage(payload.getString("queue"), payload.getString("token"),  payload.get("value"));
-        } else if(s.equalsIgnoreCase("CONNECT")){
-            return UserManager.getInstance().connect();
-        } else if(s.equalsIgnoreCase("DISCONNECT")){
-            UserManager.getInstance().disconnect(payload.getString("token"));
-        } else if(s.equalsIgnoreCase("READ")){
-            QueueManager.getInstance().confirmRead(payload.getString("queue"), payload.getString("token"), payload.getString("id"));
-        } else if(s.equalsIgnoreCase("ONLINE")){
-            UserManager.getInstance().update(payload.getString("token"));
+        if (s == null || o == null) {
+            return new JSONObject().put("error", "empty_request").toString();
         }
-        return new JSONObject().toString();
+
+        JSONObject payload = new JSONObject((String) o);
+        switch (s.toUpperCase()) {
+            case "UPDATE":
+                return QueueManager.getInstance().getUpdates(payload.getString("queue"), payload.getString("token"));
+            case "CREATE":
+                return QueueManager.getInstance().createMessage(payload.getString("queue"), payload.getString("token"), payload.get("value"));
+            case "CONNECT":
+                return UserManager.getInstance().connect();
+            case "DISCONNECT":
+                UserManager.getInstance().disconnect(payload.getString("token"));
+                return new JSONObject().put("status", "disconnected");
+            case "READ":
+                QueueManager.getInstance().confirmRead(payload.getString("queue"), payload.getString("token"), payload.getString("id"));
+                return new JSONObject().put("status", "read");
+            case "ONLINE":
+                UserManager.getInstance().update(payload.getString("token"));
+                return new JSONObject().put("status", "ok");
+            default:
+                return new JSONObject().put("error", "unknown_action").put("action", s).toString();
+        }
     }
 }

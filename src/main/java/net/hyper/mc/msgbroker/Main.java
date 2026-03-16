@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 public class Main implements Runnable {
 
     public static Logger LOGGER = Logger.getLogger("HyperMessageBroker");
+    private static Main instance;
 
     public static void main(String[] args) {
         System.out.println("\n" +
@@ -40,12 +41,13 @@ public class Main implements Runnable {
     }
 
     private File cnf = new File("config.yml");
-    private HMBConfig config;
-    private Server server;
-    private ScheduledExecutorService scheduler;
+    private final HMBConfig config;
+    private final Server server;
+    private final ScheduledExecutorService scheduler;
 
     @SneakyThrows
     public Main() {
+        instance = this;
         LOGGER.setUseParentHandlers(false);
         ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(new LoggerFormat());
@@ -57,9 +59,9 @@ public class Main implements Runnable {
         Yaml yaml = new Yaml(new Constructor(HMBConfig.class, new LoaderOptions()));
         config = yaml.load(Files.newInputStream(cnf.toPath()));
         LOGGER.info("Loading user manager...");
-        new UserManager();
+        new UserManager(config);
         LOGGER.info("Loading queue manager...");
-        new QueueManager();
+        new QueueManager(config);
         LOGGER.info("Starting server in port " + config.getPort());
         this.server = new Server(config.getPort(), new MessageChannel());
         server.start();
@@ -80,6 +82,10 @@ public class Main implements Runnable {
                 .toString();
 
         return generatedString;
+    }
+
+    public static HMBConfig getConfig() {
+        return instance.config;
     }
 
     @Override

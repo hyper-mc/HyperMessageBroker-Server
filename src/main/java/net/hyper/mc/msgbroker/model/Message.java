@@ -13,4 +13,5 @@ public class Message {
     private String sender;
     private Object value;
     private List<String> read;
+    private long createdAt;
 }
